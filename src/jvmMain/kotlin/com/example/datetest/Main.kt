@@ -14,6 +14,7 @@ fun Application.main() {
     routing {
         getAllServiceManagers().forEach { applyRoutes(it) }
     }
+
     val module = module {
         factoryOf(::PersonService)
     }

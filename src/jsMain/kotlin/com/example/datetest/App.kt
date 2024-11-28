@@ -12,11 +12,14 @@ import io.kvision.panel.vPanel
 import io.kvision.remote.getServiceManager
 import io.kvision.tabulator.*
 import io.kvision.toast.Toast
+import io.kvision.utils.Serialization
 import io.kvision.utils.perc
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import model.Person
 import kotlin.js.json
@@ -44,7 +47,6 @@ class App : Application() {
                         layout = Layout.FITCOLUMNS,
                         pagination = true,
                         paginationMode = PaginationMode.REMOTE,
-                        paginationSize = 3,
                         filterMode = FilterMode.REMOTE,
                         sortMode = SortMode.REMOTE,
                         selectableRows = 1,
@@ -57,7 +59,7 @@ class App : Application() {
                             ),
                             ColumnDefinition(
                                 title = "Id",
-                                field = Person::id.name,
+                                field = Person::_id.name,
                             ),
                             ColumnDefinition(
                                 title = "Name",
@@ -80,7 +82,7 @@ class App : Application() {
                                     val person = tabulator.toKotlinObj(cell.getData())
                                     Toast.info("updating birthday with ${person.birthday}")
                                     AppScope.launch {
-                                        PersonService().updateBirthday(person.id, person.birthday).also {
+                                        PersonService().updateBirthday(person._id, person.birthday).also {
                                             if (it) Toast.success("birthday updated") else Toast.danger("birthday update failed")
                                         }
                                     }
@@ -93,8 +95,11 @@ class App : Application() {
                     onEvent {
                         rowSelectedTabulator = {
                             self.getSelectedData().let {
-                                if (it.isNotEmpty()) {
-                                    personFormPanel.setData(it.first())
+                                it.firstOrNull()?.let { person ->
+                                    personFormPanel.setData(person)
+                                    val s = Serialization.plain.encodeToString(person)
+//                                    val s = Json.encodeToString(Person.serializer(), person)
+                                    console.warn("s", s)
                                 }
                             }
                         }
