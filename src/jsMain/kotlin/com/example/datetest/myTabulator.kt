@@ -4,9 +4,13 @@ import io.kvision.core.Container
 import io.kvision.remote.getServiceManager
 import io.kvision.tabulator.*
 import io.kvision.toast.Toast
+import io.kvision.utils.Serialization
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.serializer
 import model.Person
+import model.PersonFilter
+import kotlin.js.Date
 import kotlin.js.json
 
 fun Container.myTabulator(init: TabulatorRemote<Person, IPersonService>.() -> Unit): TabulatorRemote<Person, IPersonService> {
@@ -15,7 +19,7 @@ fun Container.myTabulator(init: TabulatorRemote<Person, IPersonService>.() -> Un
         serviceManager = getServiceManager(),
         function = IPersonService::rowData,
         serializer = serializer(),
-        stateFunction = { "test" },
+        stateFunction = { Serialization.plain.encodeToString(PersonFilter(birthday = Date())) },
         options = TabulatorOptions(
             layout = Layout.FITCOLUMNS,
             pagination = true,

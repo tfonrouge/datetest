@@ -3,7 +3,9 @@ package com.example.datetest
 import io.kvision.remote.RemoteData
 import io.kvision.remote.RemoteFilter
 import io.kvision.remote.RemoteSorter
+import kotlinx.serialization.json.Json
 import model.Person
+import model.PersonFilter
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.set
@@ -28,6 +30,8 @@ actual class PersonService : IPersonService {
         sorter: List<RemoteSorter>?,
         state: String?
     ): RemoteData<Person> {
+        val personFilter: PersonFilter = Json.decodeFromString(PersonFilter.serializer(), state ?: "{}")
+        println(personFilter)
         if (collection.coroutine.countDocuments() == 0L) {
             val r = collection.coroutine.insertMany(firstPersons)
             println(r)
