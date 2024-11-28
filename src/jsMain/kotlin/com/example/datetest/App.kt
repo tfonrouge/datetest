@@ -9,20 +9,14 @@ import io.kvision.form.text.text
 import io.kvision.form.time.dateTime
 import io.kvision.panel.root
 import io.kvision.panel.vPanel
-import io.kvision.remote.getServiceManager
-import io.kvision.tabulator.*
-import io.kvision.toast.Toast
+import io.kvision.tabulator.Tabulator
 import io.kvision.utils.Serialization
 import io.kvision.utils.perc
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 import model.Person
-import kotlin.js.json
 
 val AppScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -38,59 +32,7 @@ class App : Application() {
                     text(label = "Name") { disabled = true }.bind(Person::name)
                     dateTime(label = "Birthday") { disabled = true }.bind(Person::birthday)
                 }
-                tabulator = tabulatorRemote(
-                    serviceManager = getServiceManager(),
-                    function = IPersonService::rowData,
-                    serializer = serializer(),
-                    stateFunction = { "test" },
-                    options = TabulatorOptions(
-                        layout = Layout.FITCOLUMNS,
-                        pagination = true,
-                        paginationMode = PaginationMode.REMOTE,
-                        filterMode = FilterMode.REMOTE,
-                        sortMode = SortMode.REMOTE,
-                        selectableRows = 1,
-                        columns = listOf(
-                            ColumnDefinition(
-                                title = "",
-                                field = "selectedRow",
-                                formatter = Formatter.ROWSELECTION,
-                                width = "2.rem"
-                            ),
-                            ColumnDefinition(
-                                title = "Id",
-                                field = Person::_id.name,
-                            ),
-                            ColumnDefinition(
-                                title = "Name",
-                                field = Person::name.name,
-                            ),
-                            ColumnDefinition(
-                                title = "Birthday",
-                                field = Person::birthday.name,
-                                formatter = Formatter.DATETIME,
-                                formatterParams = json(
-                                    "inputFormat" to "iso",
-                                    "outputFormat" to "EEE dd MMM y HH:mm",
-                                    "invalidPlaceholder" to "(invalid date)",
-                                ),
-                                editor = Editor.DATETIME,
-                                editorParams = json(
-                                    "format" to "iso"
-                                ),
-                                cellEdited = { cell ->
-                                    val person = tabulator.toKotlinObj(cell.getData())
-                                    Toast.info("updating birthday with ${person.birthday}")
-                                    AppScope.launch {
-                                        PersonService().updateBirthday(person._id, person.birthday).also {
-                                            if (it) Toast.success("birthday updated") else Toast.danger("birthday update failed")
-                                        }
-                                    }
-                                }
-                            )
-                        )
-                    )
-                ) {
+                tabulator = myTabulator {
                     width = 50.perc
                     onEvent {
                         rowSelectedTabulator = {
