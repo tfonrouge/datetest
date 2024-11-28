@@ -12,8 +12,8 @@ import java.time.OffsetDateTime
 
 actual class PersonService : IPersonService {
     companion object {
-        val collection = KMongo.createClient("mongodb://arel:*@localhost:27017/?authSource=ArelDb_Olan")
-            .getDatabase("ArelDb_Olan").getCollection("persons", Person::class.java)
+        val collection = KMongo.createClient("mongodb://test:test@localhost:27017/test")
+            .getDatabase("test").getCollection("persons", Person::class.java)
         val firstPersons = mutableListOf(
             Person(_id = 1, name = "Lucy", birthday = OffsetDateTime.parse("2013-09-13T00:00:00-06:00")),
             Person(_id = 2, name = "Nathalie", birthday = OffsetDateTime.parse("2014-10-25T00:00:00-06:00")),
